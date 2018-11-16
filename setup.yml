@@ -34,12 +34,21 @@
       loop: "{{ networks|subelements('subnets') }}"
       tags: [network, subnet]
 
+    # There are two os_route tasks here to work around a bug that
+    # prevents us from creating a router with an external gateway and 
+    # interfaces.
+    - os_router:
+        state: present
+        name: "{{ item.name }}"
+        enable_snat: "{{ item.enable_snat|default(true) }}"
+      loop: "{{ routers }}"
+      tags: [network, router]
+
     - os_router:
         state: present
         name: "{{ item.name }}"
         interfaces: "{{ item.subnets }}"
         network: "{{ item.gateway }}"
-        enable_snat: "{{ item.enable_snat|default(true) }}"
       loop: "{{ routers }}"
       tags: [network, router]
 
