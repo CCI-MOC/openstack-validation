@@ -1,5 +1,5 @@
 ---
-- hosts: openstack
+- hosts: test_targets
   become: true
   tags: [test]
   tasks:
@@ -28,20 +28,11 @@
 - hosts: localhost
   tags: [test, test_lb]
   tasks:
-    - name: create loadbalancer
-      os_loadbalancer:
-        state: present
-        name: test_lb
-        vip_network: test_lb_net
-        listeners: "{{ item.listeners }}"
+    - include_role:
+        name: loadbalancer
       loop: "{{ loadbalancers }}"
-      register: lb_res
-
-    - name: assign floating ips to loadbalancers
-      command: >-
-        openstack floating ip set --port "{{ item.loadbalancer.vip_port_id }}"
-        "{{ item.item.floating_ip }}"
-      loop: "{{ lb_res.results }}"
+      loop_control:
+        loop_var: loadbalancer
 
     - name: check that load balancer responds
       uri:

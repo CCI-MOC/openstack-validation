@@ -1,0 +1,33 @@
+---
+- name: remove members from load balancers
+  os_member:
+    state: absent
+    name: "{{ item.1.name }}"
+    pool: "{{ item.0.pool.name }}"
+    protocol_port: "{{ item.1.protocol_port }}"
+    address: "{{ item.1.address }}"
+  loop: "{{ loadbalancer.listeners|subelements('pool.members') }}"
+
+- name: remove listeners
+  os_listener:
+    state: absent
+    name: "{{ item.name }}"
+    loadbalancer: "{{ loadbalancer.name }}"
+    protocol: "{{ item.protocol }}"
+    protocol_port: "{{ item.protocol_port }}"
+  loop: "{{ loadbalancer.listeners }}"
+
+- name: remove pools
+  os_pool:
+    state: absent
+    name: "{{ item.pool.name }}"
+    listener: "{{ item.name }}"
+    protocol: "{{ item.protocol }}"
+  loop: "{{ loadbalancer.listeners }}"
+
+- name: remove loadbalancer
+  os_loadbalancer:
+    state: absent
+    name: "{{ loadbalancer.name }}"
+    vip_network: "{{ loadbalancer.vip_network }}"
+  register: created_lb

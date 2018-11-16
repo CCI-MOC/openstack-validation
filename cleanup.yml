@@ -5,12 +5,11 @@
   gather_facts: false
   tasks:
     - tags: [lb]
-      os_loadbalancer:
-        state: absent
-        name: test_lb
-        vip_network: test_lb_net
-        listeners: "{{ item.listeners }}"
+      include_role:
+        name: loadbalancer/cleanup
       loop: "{{ loadbalancers }}"
+      loop_control:
+        loop_var: loadbalancer
 
     - tags: [server]
       os_server:

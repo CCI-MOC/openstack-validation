@@ -1,0 +1,38 @@
+---
+- name: create loadbalancer
+  os_loadbalancer:
+    state: present
+    name: "{{ loadbalancer.name }}"
+    vip_network: "{{ loadbalancer.vip_network }}"
+  register: created_lb
+
+- name: assign floating ips to loadbalancers
+  command: >-
+    openstack floating ip set --port "{{ created_lb.loadbalancer.vip_port_id }}"
+    "{{ loadbalancer.floating_ip }}"
+
+- name: create listeners
+  os_listener:
+    state: present
+    name: "{{ item.name }}"
+    loadbalancer: "{{ loadbalancer.name }}"
+    protocol: "{{ item.protocol }}"
+    protocol_port: "{{ item.protocol_port }}"
+  loop: "{{ loadbalancer.listeners }}"
+
+- name: create pools
+  os_pool:
+    state: present
+    name: "{{ item.pool.name }}"
+    listener: "{{ item.name }}"
+    protocol: "{{ item.protocol }}"
+  loop: "{{ loadbalancer.listeners }}"
+
+- name: add members to load balancers
+  os_member:
+    state: present
+    name: "{{ item.1.name }}"
+    pool: "{{ item.0.pool.name }}"
+    protocol_port: "{{ item.1.protocol_port }}"
+    address: "{{ item.1.address }}"
+  loop: "{{ loadbalancer.listeners|subelements('pool.members') }}"
