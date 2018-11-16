@@ -1,0 +1,7 @@
+---
+- hosts: openstack[0]
+  tasks:
+    - name: verify that jumbo frames work
+      command: >-
+        ping -M do -s 8972 -c 2 {{ hostvars[groups.openstack.1].ansible_host }}
+      changed_when: false

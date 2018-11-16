@@ -1,0 +1,50 @@
+---
+- hosts: openstack
+  become: true
+  tags: [test]
+  tasks:
+    - name: install darkhttpd on test servers
+      package:
+        name: darkhttpd
+        state: installed
+
+    - name: create /var/www
+      file:
+        path: /var/www
+        state: directory
+
+    - name: create index.html
+      copy:
+        dest: /var/www/index.html
+        content: |
+          This is {{ inventory_hostname }}.
+
+    - name: start darkhttpd
+      service:
+        name: darkhttpd
+        enabled: true
+        state: started
+
+- hosts: localhost
+  tags: [test, test_lb]
+  tasks:
+    - name: create loadbalancer
+      os_loadbalancer:
+        state: present
+        name: test_lb
+        vip_network: test_lb_net
+        listeners: "{{ item.listeners }}"
+      loop: "{{ loadbalancers }}"
+      register: lb_res
+
+    - name: assign floating ips to loadbalancers
+      command: >-
+        openstack floating ip set --port "{{ item.loadbalancer.vip_port_id }}"
+        "{{ item.item.floating_ip }}"
+      loop: "{{ lb_res.results }}"
+
+    - name: check that load balancer responds
+      uri:
+        url: "http://{{ item.floating_ip }}/"
+        return_content: true
+      loop: "{{ loadbalancers }}"

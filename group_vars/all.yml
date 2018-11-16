@@ -1,0 +1,92 @@
+---
+default_flavor: m1.small
+default_image:
+  name: fedora-29-x86_64
+  remote_user: fedora
+  python_interpreter: /usr/bin/python3
+default_key_name: lars
+default_nameservers: [8.8.8.8, 8.8.4.4]
+
+security_groups:
+  - name: test_sg_base
+    rules:
+      - proto: icmp
+      - proto: tcp
+        port: 22
+
+  - name: test_sg_http
+    rules:
+      - proto: tcp
+        port: 80
+
+networks:
+  - name: test_net0
+    subnets:
+      - name: test_net0_subnet
+        cidr: 10.0.0.0/24
+        dns_nameservers: "{{ default_nameservers }}"
+
+  - name: test_net1
+    subnets:
+      - name: test_net1_subnet
+        cidr: 10.0.1.0/24
+        dns_nameservers: "{{ default_nameservers }}"
+
+  - name: test_lb_net
+    subnets:
+      - name: test_lb_subnet
+        cidr: 10.254.0.0/24
+        dns_nameservers: "{{ default_nameservers }}"
+
+routers:
+  - name: test_router
+    gateway: external
+    subnets:
+      - test_net0_subnet
+      - test_net1_subnet
+      - test_lb_subnet
+
+servers:
+  - name: test0
+    flavor: "{{ default_flavor }}"
+    image: "{{ default_image }}"
+    key_name: "{{ default_key_name }}"
+    remote_user: "{{ default_image.remote_user }}"
+    security_groups:
+      - default
+      - test_sg_base
+      - test_sg_http
+    nics:
+      - net-name: test_net0
+
+  - name: test1
+    flavor: "{{ default_flavor }}"
+    image: "{{ default_image }}"
+    key_name: "{{ default_key_name }}"
+    security_groups:
+      - default
+      - test_sg_base
+      - test_sg_http
+    nics:
+      - net-name: test_net1
+
+loadbalancers:
+  - name: test_lb
+    vip_network: test_lb_net
+    floating_ip: 128.31.27.3
+    listeners:
+      - name: test_http_listener
+        protocol: HTTP
+        protocol_port: 80
+        pool:
+          name: test_pool
+          protocol: HTTP
+          members:
+            - name: test0
+              address: "{{ hostvars.test0.internal_address }}"
+              protocol_port: 80
+              subnet: test_net0_subnet
+            - name: test1
+              address: "{{ hostvars.test1.internal_address }}"
+              protocol_port: 80
+              subnet: test_net1_subnet
