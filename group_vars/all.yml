@@ -80,7 +80,6 @@ loadbalancers:
         protocol_port: 80
         pool:
           name: test_pool
-          protocol: HTTP
           members:
             - name: test0
               address: "{{ hostvars.test0.internal_address }}"
