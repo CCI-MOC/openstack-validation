@@ -35,3 +35,9 @@
         state: absent
         name: "{{ item.name }}"
       loop: "{{ networks }}"
+
+    - tags: [secgroup]
+      os_security_group:
+        state: absent
+        name: "{{ item.name }}"
+      loop: "{{ security_groups }}"
