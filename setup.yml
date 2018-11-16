@@ -74,17 +74,3 @@
       loop: "{{ servers }}"
       register: created_servers
       tags: [server]
-
-    - add_host:
-        name: "{{ item.item.name }}"
-        group: openstack
-        ansible_user: "{{ item.item.image.remote_user }}"
-        ansible_host: "{{ item.openstack.public_v4|default(omit) }}"
-        internal_address: "{{ item.openstack.private_v4 }}"
-        ansible_python_interpreter: >-
-          {{ item.item.image.python_interpreter|default(omit) }}
-        ansible_ssh_extra_args: >-
-          -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
-      changed_when: false
-      loop: "{{ created_servers.results }}"
-      tags: [server]

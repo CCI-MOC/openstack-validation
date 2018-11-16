@@ -82,10 +82,10 @@ loadbalancers:
           name: test_pool
           members:
             - name: test0
-              address: "{{ hostvars.test0.internal_address }}"
+              address: "{{ hostvars.test0.openstack.private_v4 }}"
               protocol_port: 80
               subnet: test_net0_subnet
             - name: test1
-              address: "{{ hostvars.test1.internal_address }}"
+              address: "{{ hostvars.test1.openstack.private_v4 }}"
               protocol_port: 80
               subnet: test_net1_subnet

@@ -1,0 +1,12 @@
+---
+plugin: openstack
+fail_on_errors: true
+cache: true
+cache_plugin: jsonfile
+cache_connection: ./.os_inventory_cache
+compose:
+  ansible_user: openstack.metadata.ansible_user
+  ansible_python_interpreter: '"/usr/bin/python3"'
+keyed_groups:
+  - prefix: os
+    key: openstack.metadata.ansible_group

@@ -1,5 +1,9 @@
 ---
-- hosts: test_targets
+- hosts: localhost
+  tasks:
+    - meta: refresh_inventory
+
+- hosts: os_test_targets
   become: true
   tags: [test]
   tasks:
