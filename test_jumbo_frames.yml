@@ -9,3 +9,10 @@
       command: >-
         ping -M do -s 8972 -c 2 {{ hostvars[groups.os_test_targets.1].ansible_host }}
       changed_when: false
+
+    - name: verify that frames larger than mtu fail
+      command: >-
+        ping -M do -s 10000 -c 2 {{ hostvars[groups.os_test_targets.1].ansible_host }}
+      register: result
+      changed_when: false
+      failed_when: result.rc == 0
