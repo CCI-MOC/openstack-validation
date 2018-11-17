@@ -1,14 +1,26 @@
 ---
-- hosts: localhost
+- name: create images
+  hosts: localhost
   gather_facts: false
-  tags: [setup]
+  tags: [setup, image]
+  tasks:
+    - name: create images
+      include_role:
+        name: image
+      loop: "{{ images }}"
+      loop_control:
+        loop_var: image
+
+- name: create network resources
+  hosts: localhost
+  gather_facts: false
+  tags: [setup, network]
   tasks:
     - name: create security groups
       os_security_group:
         state: present
         name: "{{ item.name }}"
       loop: "{{ security_groups }}"
-      tags: [network, sg]
 
     - name: create security group rules
       os_security_group_rule:
@@ -19,14 +31,12 @@
         port_range_max: "{{ item.1.port|default(omit) }}"
         remote_ip_prefix: "0.0.0.0/0"
       loop: "{{ security_groups|subelements('rules') }}"
-      tags: [network, sg]
 
     - name: create networks
       os_network:
         state: present
         name: "{{ item.name }}"
       loop: "{{ networks }}"
-      tags: [network]
 
     - name: create subnets
       os_subnet:
@@ -36,7 +46,6 @@
         cidr: "{{ item.1.cidr }}"
         dns_nameservers: "{{ item.1.dns_nameservers|default(['8.8.8.8']) }}"
       loop: "{{ networks|subelements('subnets') }}"
-      tags: [network, subnet]
 
     # There are two os_route tasks here to work around a bug that
     # prevents us from creating a router with an external gateway and 
@@ -47,7 +56,6 @@
         name: "{{ item.name }}"
         enable_snat: "{{ item.enable_snat|default(true) }}"
       loop: "{{ routers }}"
-      tags: [network, router]
 
     - name: set router gateways and attach subnets
       os_router:
@@ -56,8 +64,12 @@
         interfaces: "{{ item.subnets }}"
         network: "{{ item.gateway }}"
       loop: "{{ routers }}"
-      tags: [network, router]
 
+- name: create servers
+  hosts: localhost
+  gather_facts: false
+  tags: [setup, server]
+  tasks:
     - name: create servers
       os_server:
         state: present
@@ -73,4 +85,3 @@
           ansible_group: test_targets
       loop: "{{ servers }}"
       register: created_servers
-      tags: [server]

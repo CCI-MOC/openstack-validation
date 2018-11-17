@@ -1,41 +1,53 @@
 ---
 ## This playbook cleans up all the resources created by "setup.yml"
 ## in this directory.
-- hosts: localhost
+- name: delete load balancers
+  hosts: localhost
   gather_facts: false
+  tags: [cleanup, loadbalancer]
   tasks:
-    - tags: [lb]
+    - name: delete load balancer
       include_role:
         name: loadbalancer/cleanup
       loop: "{{ loadbalancers }}"
       loop_control:
         loop_var: loadbalancer
 
-    - tags: [server]
+- name: delete servers
+  hosts: localhost
+  gather_facts: false
+  tags: [cleanup, server]
+  tasks:
+    - name: delete servers
       os_server:
         state: absent
         name: "{{ item.name }}"
       loop: "{{ servers }}"
 
-    - tags: [network]
+- name: delete network resources
+  hosts: localhost
+  gather_facts: false
+  tags: [cleanup, network]
+  tasks:
+    - name: delete routers
       os_router:
         state: absent
         name: "{{ item.name }}"
       loop: "{{ routers }}"
 
-    - tags: [network]
+    - name: delete subnets
       os_subnet:
         state: absent
         name: "{{ item.1.name }}"
       loop: "{{ networks|subelements('subnets') }}"
 
-    - tags: [network]
+    - name: delete networks
       os_network:
         state: absent
         name: "{{ item.name }}"
       loop: "{{ networks }}"
 
-    - tags: [secgroup]
+    - name: delete security groups
       os_security_group:
         state: absent
         name: "{{ item.name }}"
