@@ -1,0 +1,32 @@
+---
+- name: check if image exist
+  os_image_facts:
+    image: "{{ image.name }}"
+  register: image_check
+
+- when: image_check.ansible_facts.openstack_image is none
+  block:
+    - name: create temporary directory for image download
+      tempfile:
+        state: directory
+        suffix: images
+      changed_when: false
+      register: tempdir
+
+    - name: download remote image
+      get_url:
+        url: "{{ image.url }}"
+        dest: "{{ tempdir.path }}/{{ image.name }}.img"
+
+    - name: upload image to glance
+      os_image:
+        name: "{{ image.name }}"
+        container_format: "{{ image.container_format|default('bare') }}"
+        disk_format: "{{ image.disk_format|default('qcow2') }}"
+        filename: "{{ tempdir.path }}/{{ image.name }}.img"
+  always:
+    - name: clean up temporary directory
+      file:
+        path: "{{ tempdir.path }}"
+        state: absent
+      changed_when: false

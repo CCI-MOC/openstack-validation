@@ -1,4 +1,8 @@
 ---
+images:
+  - name: fedora-29-x86_64
+    url: https://download.fedoraproject.org/pub/fedora/linux/releases/29/Cloud/x86_64/images/Fedora-Cloud-Base-29-1.2.x86_64.qcow2
+
 default_flavor: m1.small
 default_image:
   name: fedora-29-x86_64
