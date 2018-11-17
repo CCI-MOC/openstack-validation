@@ -1,13 +1,4 @@
 ---
-- name: remove members from load balancers
-  os_member:
-    state: absent
-    name: "{{ item.1.name }}"
-    pool: "{{ item.0.pool.name }}"
-    protocol_port: "{{ item.1.protocol_port }}"
-    address: "{{ item.1.address }}"
-  loop: "{{ loadbalancer.listeners|subelements('pool.members') }}"
-
 - name: remove listeners
   os_listener:
     state: absent
