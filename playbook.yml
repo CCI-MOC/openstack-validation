@@ -1,4 +1,5 @@
 ---
 - import_playbook: setup.yml
+- import_playbook: wait_for_servers.yml
 - import_playbook: test_jumbo_frames.yml
 - import_playbook: test_loadbalancer.yml

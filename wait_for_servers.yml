@@ -1,0 +1,13 @@
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: refresh inventory
+      meta: refresh_inventory
+
+- name: wait for servers to boot
+  hosts: os_test_targets
+  gather_facts: false
+  tasks:
+    - name: wait for servers to boot
+      wait_for_connection:
+
