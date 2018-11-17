@@ -21,6 +21,7 @@
       copy:
         dest: /var/www/index.html
         content: |
+          load balancer test
           This is {{ inventory_hostname }}.
 
     - name: start darkhttpd
@@ -42,4 +43,10 @@
       uri:
         url: "http://{{ item.floating_ip }}/"
         return_content: true
+      register: response
       loop: "{{ loadbalancers }}"
+
+    - name: validate response content
+      assert:
+        that: '"load balancer test" in item.content'
+      loop: "{{ response.results }}"
