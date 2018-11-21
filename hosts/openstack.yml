@@ -7,6 +7,7 @@ cache_connection: ./.os_inventory_cache
 compose:
   ansible_user: openstack.metadata.ansible_user
   ansible_python_interpreter: '"/usr/bin/python3"'
+  ansible_ssh_private_key_file: '"./id_rsa_test"'
 keyed_groups:
   - prefix: os
     key: openstack.metadata.ansible_group

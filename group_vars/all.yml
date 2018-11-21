@@ -8,7 +8,7 @@ default_image:
   name: fedora-29-x86_64
   remote_user: fedora
   python_interpreter: /usr/bin/python3
-default_key_name: lars
+default_key_name: test_key
 default_nameservers: [8.8.8.8, 8.8.4.4]
 
 security_groups:

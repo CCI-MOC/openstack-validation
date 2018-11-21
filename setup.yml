@@ -65,6 +65,22 @@
         network: "{{ item.gateway }}"
       loop: "{{ routers }}"
 
+- name: create keypair
+  hosts: localhost
+  gather_facts: false
+  tags: [setup, keypair]
+  tasks:
+    - name: create keypair
+      command: >-
+        ssh-keygen -t rsa -b 4096 -f id_rsa_test -N '' -C 'OpenStack Test Key'
+      args:
+        creates: id_rsa_test
+
+    - name: upload keypair
+      os_keypair:
+        name: test_key
+        public_key_file: id_rsa_test.pub
+
 - name: create servers
   hosts: localhost
   gather_facts: false
