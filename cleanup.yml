@@ -1,6 +1,4 @@
 ---
-## This playbook cleans up all the resources created by "setup.yml"
-## in this directory.
 - name: delete load balancers
   hosts: localhost
   gather_facts: false
@@ -23,6 +21,16 @@
         state: absent
         name: "{{ item.name }}"
       loop: "{{ servers }}"
+
+- name: delete volume
+  hosts: localhost
+  gather_facts: false
+  tags: [cleanup, volume]
+  tasks:
+    - name: delete volume
+      os_volume:
+        state: absent
+        name: test_volume
 
 - name: delete network resources
   hosts: localhost
