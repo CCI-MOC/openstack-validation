@@ -1,0 +1,62 @@
+---
+- hosts: localhost
+  tasks:
+    - meta: refresh_inventory
+
+- hosts: localhost
+  name: create and attach volume
+  tags: [test_volume]
+  tasks:
+    - name: create volume
+      os_volume:
+        state: present
+        size: 1
+        display_name: test_volume
+
+    - name: attach volume to host
+      os_server_volume:
+        state: present
+        server: "{{ groups.os_test_targets.0 }}"
+        volume: test_volume
+        device: /dev/vdb
+
+- hosts: os_test_targets[0]
+  name: verify volume
+  tags: [test_volume]
+  become: true
+  tasks:
+    - name: format volume
+      command: mkfs -t ext4 /dev/vdb
+      changed_when: false
+
+    - name: generate a random string
+      shell: >-
+        dd if=/dev/urandom bs=1 count=10 |
+        base64
+      register: random
+      changed_when: false
+
+    - block:
+        - name: mount volume
+          command: mount /dev/vdb /mnt
+          changed_when: false
+
+        - name: write to volume
+          copy:
+            dest: /mnt/testfile
+            content: "{{ random.stdout }}"
+
+        - name: read back data
+          command: >-
+            cat /mnt/testfile
+          changed_when: false
+          register: testfile_contents
+
+        - name: verify data
+          assert:
+            that: "testfile_contents.stdout == random.stdout"
+      always:
+        - name: unmount volume
+          command: umount /dev/vdb
+          changed_when: false
+          ignore_errors: true
