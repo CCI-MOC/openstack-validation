@@ -77,7 +77,7 @@ servers:
 loadbalancers:
   - name: test_lb
     vip_network: test_lb_net
-    floating_ip: 128.31.27.3
+    floating_ip: "{{ loadbalancer_floating_ip }}"
     listeners:
       - name: test_http_listener
         protocol: HTTP
