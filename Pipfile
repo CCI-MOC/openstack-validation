@@ -7,7 +7,7 @@ name = "pypi"
 python-openstackclient = '*'
 python-openstacksdk = '*'
 python-octaviaclient = '*'
-ansible = {git = "https://github.com/larsks/ansible.git", ref = "bug/openstack-inventory"}
+ansible = {git = "https://github.com/ansible/ansible", ref = "devel"}
 
 [dev-packages]
 
